@@ -19,7 +19,7 @@ A simple web-based **GPA Calculator** that helps students quickly estimate their
 
 Open the project locally by launching:
 
-`index.html`
+`https://rohanishim69.github.io/gpa_calulator/`
 
 in your browser.
 
