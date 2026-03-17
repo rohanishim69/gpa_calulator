@@ -2,203 +2,252 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>GPA Calculator & College Predictor</title>
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Weighted GPA Calculator (6.0 Scale)</title>
 <style>
-body{
+  body {
     font-family: Arial, sans-serif;
-    background:#f4f6f8;
-    padding:40px;
-}
+    background: #f4f6f8;
+    padding: 40px;
+    margin: 0;
+  }
 
-.container{
-    max-width:650px;
-    margin:auto;
-    background:white;
-    padding:25px;
-    border-radius:10px;
-    box-shadow:0 0 12px rgba(0,0,0,0.1);
-}
+  .container {
+    max-width: 760px;
+    margin: auto;
+    background: white;
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0 0 12px rgba(0, 0, 0, 0.1);
+  }
 
-h2{
-    margin-top:0;
-}
+  h1, h2, h3 {
+    margin-top: 0;
+  }
 
-.course{
-    margin-bottom:10px;
-}
+  .course {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr auto;
+    gap: 10px;
+    margin-bottom: 10px;
+    align-items: center;
+  }
 
-input, select{
-    padding:6px;
-    margin-left:5px;
-}
+  label {
+    font-size: 0.92rem;
+    color: #333;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
 
-button{
-    padding:8px 14px;
-    margin-top:10px;
-    margin-right:5px;
-    background:#2a7cff;
-    color:white;
-    border:none;
-    border-radius:5px;
-    cursor:pointer;
-}
+  input, select, button {
+    padding: 8px;
+    border-radius: 6px;
+    border: 1px solid #d3d9df;
+    font-size: 0.95rem;
+  }
 
-button:hover{
-    background:#1d5ed6;
-}
+  button {
+    background: #2a7cff;
+    color: white;
+    border: none;
+    cursor: pointer;
+  }
 
-#gpa{
-    font-weight:bold;
-    color:#2a7cff;
-}
+  button:hover {
+    background: #1d5ed6;
+  }
 
-ul{
-    padding-left:20px;
-}
+  .remove-btn {
+    background: #f44336;
+    padding: 8px 10px;
+  }
+
+  .remove-btn:hover {
+    background: #d8342a;
+  }
+
+  .controls {
+    margin: 14px 0;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  #gpa {
+    font-weight: bold;
+    color: #2a7cff;
+  }
+
+  .note {
+    background: #f8fbff;
+    border-left: 4px solid #2a7cff;
+    padding: 10px 12px;
+    margin-bottom: 16px;
+    color: #1a3252;
+  }
+
+  ul {
+    padding-left: 20px;
+  }
+
+  @media (max-width: 700px) {
+    .course {
+      grid-template-columns: 1fr;
+    }
+  }
 </style>
 </head>
-
 <body>
-
 <div class="container">
+  <h1>🎓 Weighted GPA Calculator (6.0 Scale)</h1>
+  <p class="note">
+    Class weights: <strong>AP = 6.0</strong>, <strong>Advanced/Honors = 5.5</strong>, <strong>On-Level = 5.0</strong>.
+    Grade multipliers used: A = 1.0, B = 0.8, C = 0.6, D = 0.4, F = 0.0.
+  </p>
 
-<h2>🎓 GPA Calculator & College Predictor</h2>
+  <div id="courses"></div>
 
-<div id="courses">
+  <div class="controls">
+    <button type="button" onclick="addCourse()">Add Course</button>
+    <button type="button" onclick="calculateGPA()">Calculate Weighted GPA</button>
+  </div>
 
-<div class="course">
-Grade:
-<select class="grade">
-<option value="4">A</option>
-<option value="3">B</option>
-<option value="2">C</option>
-<option value="1">D</option>
-<option value="0">F</option>
-</select>
+  <h2>Your Weighted GPA (out of 6.0): <span id="gpa">0.00</span></h2>
 
-Credits:
-<input type="number" class="credits" value="1" min="1">
-</div>
-
-</div>
-
-<button onclick="addCourse()">Add Course</button>
-<button onclick="calculateGPA()">Calculate GPA</button>
-
-<h3>Your GPA: <span id="gpa">0.00</span></h3>
-
-<h3>Possible Colleges:</h3>
-<ul id="collegeList"></ul>
-
+  <h3>Suggested College Fit</h3>
+  <ul id="collegeList"></ul>
 </div>
 
 <script>
+  const gradeMultipliers = {
+    A: 1.0,
+    B: 0.8,
+    C: 0.6,
+    D: 0.4,
+    F: 0.0
+  };
 
-function addCourse(){
+  const courseLevelMax = {
+    ap: 6.0,
+    honors: 5.5,
+    onlevel: 5.0
+  };
 
-const container = document.getElementById("courses")
+  function buildCourseRow() {
+    const row = document.createElement("div");
+    row.className = "course";
 
-const div = document.createElement("div")
-div.className = "course"
+    row.innerHTML = `
+      <label>
+        Grade
+        <select class="grade">
+          <option value="A">A</option>
+          <option value="B">B</option>
+          <option value="C">C</option>
+          <option value="D">D</option>
+          <option value="F">F</option>
+        </select>
+      </label>
 
-div.innerHTML = `
-Grade:
-<select class="grade">
-<option value="4">A</option>
-<option value="3">B</option>
-<option value="2">C</option>
-<option value="1">D</option>
-<option value="0">F</option>
-</select>
+      <label>
+        Class Type
+        <select class="level">
+          <option value="ap">AP (max 6.0)</option>
+          <option value="honors">Advanced/Honors (max 5.5)</option>
+          <option value="onlevel">On-Level (max 5.0)</option>
+        </select>
+      </label>
 
-Credits:
-<input type="number" class="credits" value="1" min="1">
-`
+      <label>
+        Credits
+        <input type="number" class="credits" value="1" min="0.5" step="0.5">
+      </label>
 
-container.appendChild(div)
+      <button type="button" class="remove-btn" onclick="removeCourse(this)">Remove</button>
+    `;
 
-}
+    return row;
+  }
 
-function calculateGPA(){
+  function addCourse() {
+    const container = document.getElementById("courses");
+    container.appendChild(buildCourseRow());
+  }
 
-const grades = document.querySelectorAll(".grade")
-const credits = document.querySelectorAll(".credits")
+  function removeCourse(button) {
+    button.closest(".course").remove();
+  }
 
-let totalPoints = 0
-let totalCredits = 0
+  function calculateGPA() {
+    const rows = document.querySelectorAll(".course");
 
-for(let i=0;i<grades.length;i++){
+    let totalPoints = 0;
+    let totalCredits = 0;
 
-let grade = parseFloat(grades[i].value)
-let credit = parseFloat(credits[i].value)
+    rows.forEach((row) => {
+      const grade = row.querySelector(".grade").value;
+      const level = row.querySelector(".level").value;
+      const credit = parseFloat(row.querySelector(".credits").value);
 
-totalPoints += grade * credit
-totalCredits += credit
+      if (!Number.isFinite(credit) || credit <= 0) {
+        return;
+      }
 
-}
+      const earnedPoints = gradeMultipliers[grade] * courseLevelMax[level];
+      totalPoints += earnedPoints * credit;
+      totalCredits += credit;
+    });
 
-let gpa = totalPoints / totalCredits
+    const gpa = totalCredits === 0 ? 0 : totalPoints / totalCredits;
 
-document.getElementById("gpa").innerText = gpa.toFixed(2)
+    document.getElementById("gpa").innerText = gpa.toFixed(2);
+    showColleges(gpa);
+  }
 
-showColleges(gpa)
+  function showColleges(gpa) {
+    const collegeList = document.getElementById("collegeList");
+    collegeList.innerHTML = "";
 
-}
+    let colleges = [];
 
-function showColleges(gpa){
+    if (gpa >= 5.5) {
+      colleges = [
+        "Reach: Stanford, MIT, Harvard, Princeton",
+        "Strong targets: UCLA, UC Berkeley, University of Michigan"
+      ];
+    } else if (gpa >= 5.0) {
+      colleges = [
+        "Reach/Target mix: NYU, Boston University, UT Austin",
+        "Targets: University of Florida, University of Washington"
+      ];
+    } else if (gpa >= 4.5) {
+      colleges = [
+        "Targets: Penn State, Michigan State, Texas Tech",
+        "Likely: University of Oregon, Arizona State"
+      ];
+    } else if (gpa >= 4.0) {
+      colleges = [
+        "Targets: University of North Texas, University of Houston",
+        "Likely: many regional public universities"
+      ];
+    } else {
+      colleges = [
+        "Consider: community colleges and open-admission pathways",
+        "Build options with strong essays, activities, and test scores"
+      ];
+    }
 
-const collegeList = document.getElementById("collegeList")
-collegeList.innerHTML = ""
+    colleges.forEach((college) => {
+      const li = document.createElement("li");
+      li.textContent = college;
+      collegeList.appendChild(li);
+    });
+  }
 
-let colleges = []
-
-if(gpa >= 3.8){
-colleges = [
-"Harvard University",
-"Stanford University",
-"MIT",
-"UC Berkeley"
-]
-}
-else if(gpa >= 3.5){
-colleges = [
-"University of Texas at Austin",
-"Boston University",
-"University of Florida"
-]
-}
-else if(gpa >= 3.0){
-colleges = [
-"Texas State University",
-"Arizona State University",
-"University of Oregon"
-]
-}
-else if(gpa >= 2.5){
-colleges = [
-"University of North Texas",
-"Texas Tech University"
-]
-}
-else{
-colleges = [
-"Community Colleges",
-"Open Enrollment Universities"
-]
-}
-
-colleges.forEach(college => {
-
-let li = document.createElement("li")
-li.textContent = college
-collegeList.appendChild(li)
-
-})
-
-}
-
+  addCourse();
+  addCourse();
 </script>
-
 </body>
 </html>
