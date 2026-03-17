@@ -1,36 +1,109 @@
 ```html
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
+
+<meta charset="UTF-8">
 <title>GPA Calculator</title>
 
 <style>
 
 body{
-font-family: Arial;
-text-align:center;
-margin:40px;
+font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+background:#f5f5f7;
+margin:0;
+padding:0;
+display:flex;
+justify-content:center;
+}
+
+.container{
+width:900px;
+margin-top:60px;
+background:white;
+padding:40px;
+border-radius:16px;
+box-shadow:0 10px 30px rgba(0,0,0,0.08);
+}
+
+h1{
+font-size:36px;
+margin-bottom:10px;
+}
+
+.subtitle{
+color:#6e6e73;
+margin-bottom:30px;
+}
+
+.tabs{
+margin-bottom:30px;
+}
+
+.tabs button{
+background:none;
+border:none;
+font-size:16px;
+margin-right:20px;
+cursor:pointer;
+padding-bottom:6px;
+border-bottom:2px solid transparent;
+}
+
+.tabs button.active{
+border-color:#0071e3;
+color:#0071e3;
 }
 
 table{
-margin:auto;
+width:100%;
 border-collapse:collapse;
+margin-bottom:20px;
 }
 
-th,td{
-padding:10px;
-border:1px solid #ccc;
+th{
+text-align:left;
+padding-bottom:10px;
+font-size:14px;
+color:#6e6e73;
 }
 
-button{
-margin:10px;
-padding:10px 20px;
-font-size:16px;
-cursor:pointer;
+td{
+padding:8px 0;
 }
 
 input,select{
-padding:5px;
+width:100%;
+padding:10px;
+border-radius:8px;
+border:1px solid #d2d2d7;
+font-size:14px;
+}
+
+button.primary{
+background:#0071e3;
+color:white;
+border:none;
+padding:10px 18px;
+border-radius:8px;
+font-size:14px;
+cursor:pointer;
+margin-right:10px;
+}
+
+button.secondary{
+background:#f5f5f7;
+border:1px solid #d2d2d7;
+padding:10px 18px;
+border-radius:8px;
+cursor:pointer;
+}
+
+.result{
+margin-top:20px;
+font-size:20px;
+font-weight:500;
 }
 
 .tab{
@@ -38,42 +111,51 @@ display:none;
 }
 
 </style>
+
 </head>
+
+
 
 <body>
 
+<div class="container">
+
 <h1>GPA Calculator</h1>
-
-<button onclick="showTab('unweighted')">Unweighted GPA</button>
-<button onclick="showTab('weighted')">Weighted GPA</button>
+<div class="subtitle">Simple GPA calculator for students</div>
 
 
-<!-- UNWEIGHTED TAB -->
+<div class="tabs">
+<button id="tab1" onclick="showTab('unweighted')" class="active">Unweighted</button>
+<button id="tab2" onclick="showTab('weighted')">Weighted</button>
+</div>
 
-<div id="unweighted" class="tab">
 
-<h2>Unweighted GPA</h2>
+
+<!-- UNWEIGHTED -->
+
+<div id="unweighted" class="tab" style="display:block">
 
 <table id="unweightedTable">
+
 <tr>
 <th>Course</th>
 <th>Grade (0-100)</th>
 </tr>
+
 </table>
 
-<button onclick="addUnweightedCourse()">Add Course</button>
-<button onclick="calculateUnweighted()">Calculate GPA</button>
+<button class="secondary" onclick="addUnweightedCourse()">Add Course</button>
+<button class="primary" onclick="calculateUnweighted()">Calculate</button>
 
-<h3 id="unweightedResult"></h3>
+<div class="result" id="unweightedResult"></div>
 
 </div>
 
 
-<!-- WEIGHTED TAB -->
+
+<!-- WEIGHTED -->
 
 <div id="weighted" class="tab">
-
-<h2>Weighted GPA</h2>
 
 <table id="weightedTable">
 
@@ -85,11 +167,15 @@ display:none;
 
 </table>
 
-<button onclick="addWeightedCourse()">Add Course</button>
-<button onclick="calculateWeighted()">Calculate GPA</button>
+<button class="secondary" onclick="addWeightedCourse()">Add Course</button>
+<button class="primary" onclick="calculateWeighted()">Calculate</button>
 
-<h3 id="weightedResult"></h3>
-<h3 id="weightedUnweightedResult"></h3>
+<div class="result" id="weightedResult"></div>
+<div class="result" id="weightedUnweightedResult"></div>
+
+</div>
+
+
 
 </div>
 
@@ -97,13 +183,21 @@ display:none;
 
 <script>
 
-
 function showTab(tab){
 
 document.getElementById("unweighted").style.display="none";
 document.getElementById("weighted").style.display="none";
 
+document.getElementById("tab1").classList.remove("active");
+document.getElementById("tab2").classList.remove("active");
+
 document.getElementById(tab).style.display="block";
+
+if(tab==="unweighted"){
+document.getElementById("tab1").classList.add("active");
+}else{
+document.getElementById("tab2").classList.add("active");
+}
 
 }
 
@@ -131,9 +225,7 @@ row.innerHTML=`
 
 <td><input placeholder="Course Name"></td>
 
-<td>
-<input type="number" class="uwgrade">
-</td>
+<td><input type="number" class="uwgrade"></td>
 
 `;
 
@@ -153,10 +245,8 @@ grades.forEach(g=>{
 let grade=parseFloat(g.value);
 
 if(!isNaN(grade)){
-
 total+=gradeToGPA(grade);
 count++;
-
 }
 
 });
@@ -180,17 +270,13 @@ row.innerHTML=`
 
 <td><input placeholder="Course Name"></td>
 
-<td>
-<input type="number" class="wgrade">
-</td>
+<td><input type="number" class="wgrade"></td>
 
 <td>
 <select class="level">
-
 <option value="5">Regular</option>
-<option value="5.5">Honors / Advanced</option>
+<option value="5.5">Honors</option>
 <option value="6">AP</option>
-
 </select>
 </td>
 
@@ -239,13 +325,9 @@ document.getElementById("weightedUnweightedResult").innerText=
 
 }
 
-
-
-showTab('unweighted');
-
-
 </script>
 
 </body>
+
 </html>
 ```
